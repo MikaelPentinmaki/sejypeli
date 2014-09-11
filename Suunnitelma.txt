@@ -1,0 +1,23 @@
+﻿= Suunnitelman pohja =
+
+Tekijä:Mikael Pentinmäki
+
+== Tietoja pelistä ==
+
+ * Pelin nimi:Space Gun Man
+ * Pelialusta: Windows
+ * Pelaajien lukumäärä: 1
+
+== Pelin tarina ==
+Pelin taustatarina tai kuvaus pelin teemasta.
+
+== Pelin idea ja tavoitteet ==
+Kuvaus pelin ideasta ja tavoitteista, mitä pelissä on tarkoitus tehdä. Tuhota Asteroideja ja vihollisia.
+
+== Hahmotelma pelistä ==
+(Liitä kuva tai kuvia paperilta skannattuna) iso peli alue, zoomautunut kamera osoittamaan pelaajaan.
+
+== Toteutuksen suunnitelma ==
+Toteutuksen suunnitelma, mitä tekisin ja missä järjestyksessä? Millä aikataululla? 
+
+kenttä, pelaaja, liikkuminen, reunaTeleportti, Ampuminen, viholliset (jos ehtii niin Asteroidit)
