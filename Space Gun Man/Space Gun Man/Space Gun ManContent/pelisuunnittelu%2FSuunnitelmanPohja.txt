@@ -20,4 +20,4 @@ Kuvaus pelin ideasta ja tavoitteista, mitä pelissä on tarkoitus tehdä. Tuhota
 == Toteutuksen suunnitelma ==
 Toteutuksen suunnitelma, mitä tekisin ja missä järjestyksessä? Millä aikataululla? 
 
-kenttä, pelaaja, liikkuminen, reunaTeleportti, Ampuminen, viholliset (jos ehtii niin Asteroidit)
+kenttä, pelaaja, liikkuminen, reunaTeleportti, Ampuminen, viholliset, Laskuri (jos ehtii niin Asteroidit)
