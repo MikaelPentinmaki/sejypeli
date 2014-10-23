@@ -24,6 +24,15 @@ public class Space_Gun_Man : PhysicsGame
     IntMeter VELaskuri;
     IntMeter PLaskuri;
     Label PNaytto;
+    PhysicsObject ElamaPisteVoima1;
+    PhysicsObject ElamaPisteVoima2;
+    Image ElamaPisteVoimaKuva;
+    IntMeter AmmusLaskuri;
+    Label AmmusNaytto;
+    PhysicsObject AmmusPisteVoima1;
+    PhysicsObject AmmusPisteVoima2;
+    Image AmmusPisteVoimaKuva;
+    Label UudelleenSyntymaTeksti;
     
     public override void Begin()
     {
@@ -35,6 +44,9 @@ public class Space_Gun_Man : PhysicsGame
        VALaskuri();
        ElamaLaskuri();
        PisteLaskuri();
+       LuoElamaPisteVoimat();
+       LuoAmmusLaskuri();
+       LuoAmmusVoimat();
 
         PhoneBackButton.Listen(ConfirmExit, "Lopeta peli");
         Keyboard.Listen(Key.Escape, ButtonState.Pressed, ConfirmExit, "Lopeta peli");
@@ -51,7 +63,6 @@ public class Space_Gun_Man : PhysicsGame
     Camera.Zoom(7.0);
     Camera.FollowedObject = Alus;
     AddCollisionHandler(Alus, Tormaus);
-    
 }
 
     void LuoKentta()
@@ -61,21 +72,31 @@ public class Space_Gun_Man : PhysicsGame
         OikeaReuna = Level.CreateRightBorder();
         YlaReuna = Level.CreateTopBorder();
         AlaReuna = Level.CreateBottomBorder();
+    }
 
-        
+    void TuhoaAlus()
+    {
+        Alus.Destroy();
+        KuolemaTeksti = new Label("You Died");
+        KuolemaTeksti.TextColor = Color.Red;
+        Add(KuolemaTeksti);
 
+        UudelleenSyntymaTeksti = new Label("Respawn");
+        UudelleenSyntymaTeksti.Y = -30;
+        UudelleenSyntymaTeksti.TextColor = Color.Red;
+        Add(UudelleenSyntymaTeksti);
+        Mouse.ListenOn(UudelleenSyntymaTeksti, MouseButton.Left, ButtonState.Pressed, AloitaAlusta, "Aloita Alusta");
     }
 
     void AsetaNappaimet()
     {
-        Keyboard.Listen(Key.Up, ButtonState.Released, HidastaAlusta, "Hidasta alusta");
         Keyboard.Listen(Key.Up, ButtonState.Down, LiikutaAlusta, "Liikuta Alusta");
         Keyboard.Listen(Key.Up, ButtonState.Released, PalautaKuva, "palauttaa aluksen kuvan");
         Keyboard.Listen(Key.Left, ButtonState.Down, KaannaAlustaVasempaan, "Käännä alusta vasempaan");
         Keyboard.Listen(Key.Right, ButtonState.Down, KaannaAlustaOikeaan, "Käännä alusta oikean");
         Keyboard.Listen(Key.Space, ButtonState.Pressed, Ammu, "Ammu");
         Keyboard.Listen(Key.Down, ButtonState.Pressed, PysaytaAlus, "Pysäytä alus");
-        
+        IsMouseVisible = true;
     }
 
     void PalautaKuva()
@@ -120,25 +141,29 @@ public class Space_Gun_Man : PhysicsGame
 
     void Ammu()
     {
-        Ammus = new PhysicsObject(0.4, 0.4);
-        Ammus2 = new PhysicsObject(0.4, 0.4);
-        Image AmmusKuva = LoadImage("Ammus Kuva");
-        Ammus.Image = AmmusKuva;
-        Ammus2.Image = AmmusKuva;
-        Vector Suunta = Vector.FromLengthAndAngle(150.0, Alus.Angle);
-        Angle Kulma = Alus.Angle;
-        Kulma.Degrees -= 180;
-        Vector Suunta2 = Vector.FromLengthAndAngle(150.0, Kulma);
-        Ammus.Position = Alus.Position;
-        Ammus2.Position = Alus.Position;
-        Ammus.IgnoresCollisionResponse = true;
-        Ammus2.IgnoresCollisionResponse = true;
-        Ammus.Hit(Suunta);
-        Ammus2.Hit(Suunta2);
-        Add(Ammus);
-        Add(Ammus2);
-        AddCollisionHandler(Ammus, Vihollinen, OsuViholliseen);
-        AddCollisionHandler(Ammus2, Vihollinen, OsuViholliseen);
+        if (AmmusLaskuri.Value >= 1)
+        {
+            Ammus = new PhysicsObject(0.4, 0.4);
+            Ammus2 = new PhysicsObject(0.4, 0.4);
+            Image AmmusKuva = LoadImage("Ammus Kuva");
+            Ammus.Image = AmmusKuva;
+            Ammus2.Image = AmmusKuva;
+            Vector Suunta = Vector.FromLengthAndAngle(150.0, Alus.Angle);
+            Angle Kulma = Alus.Angle;
+            Kulma.Degrees -= 180;
+            Vector Suunta2 = Vector.FromLengthAndAngle(150.0, Kulma);
+            Ammus.Position = Alus.Position;
+            Ammus2.Position = Alus.Position;
+            Ammus.IgnoresCollisionResponse = true;
+            Ammus2.IgnoresCollisionResponse = true;
+            Ammus.Hit(Suunta);
+            Ammus2.Hit(Suunta2);
+            Add(Ammus);
+            Add(Ammus2);
+            AddCollisionHandler(Ammus, Vihollinen, OsuViholliseen);
+            AddCollisionHandler(Ammus2, Vihollinen, OsuViholliseen);
+            AmmusLaskuri.Value -= 2;
+        }
     }
     
     void Tormaus(PhysicsObject tormaaja, PhysicsObject kohde)
@@ -172,6 +197,7 @@ public class Space_Gun_Man : PhysicsGame
     void LuoVihollinen()
     {
         Vihollinen = new PhysicsObject(5, 5);
+        Vihollinen.IgnoresCollisionResponse = true;
         Vihollinen.X = -490;
         Image VihollisenKuva = LoadImage("Vihollis Alus");
         Vihollinen.Image = VihollisenKuva;
@@ -181,6 +207,7 @@ public class Space_Gun_Man : PhysicsGame
         Vihollinen.Brain = SeuraajaTekoäly;
         Add(Vihollinen);
         VELaskuri = new IntMeter(5);
+        
     }
 
     void VALaskuri()
@@ -246,19 +273,6 @@ public class Space_Gun_Man : PhysicsGame
         }
     }
 
-    void HidastaAlusta()
-    {
-        Alus.MaxVelocity = 50;
-    }
-
-    void TuhoaAlus()
-    {
-        Alus.Destroy();
-        KuolemaTeksti = new Label("You Died");
-        KuolemaTeksti.TextColor = Color.Red;
-        Add(KuolemaTeksti);
-    }
-
     void TuhoaVihollinen()
     {
         Vihollinen.Destroy();
@@ -268,7 +282,7 @@ public class Space_Gun_Man : PhysicsGame
 
     void PysaytaAlus()
     {
-        Alus.MaxVelocity = 10;
+        Alus.MaxVelocity = 20;
     }
 
     void PisteLaskuri()
@@ -282,5 +296,89 @@ public class Space_Gun_Man : PhysicsGame
         PNaytto.BindTo(PLaskuri);
         PNaytto.Title = "Destroyed enemies";
         Add(PNaytto);
+    }
+
+    void LuoElamaPisteVoimat()
+    {
+        ElamaPisteVoima1 = new PhysicsObject(4, 4);
+        ElamaPisteVoimaKuva = LoadImage("+ElämäPisteVoima");
+        ElamaPisteVoima1.Image = ElamaPisteVoimaKuva;
+        ElamaPisteVoima1.X = 200;
+        ElamaPisteVoima1.Y = 300;
+        AddCollisionHandler(Alus, ElamaPisteVoima1, KeraaElamaPisteVoima1);
+        ElamaPisteVoima1.IgnoresCollisionResponse = true;
+        Add(ElamaPisteVoima1);
+
+        ElamaPisteVoima2 = new PhysicsObject(4, 4);
+        ElamaPisteVoima2.Image = ElamaPisteVoimaKuva;
+        ElamaPisteVoima2.X = -200;
+        ElamaPisteVoima2.Y = -200;
+        AddCollisionHandler(Alus, ElamaPisteVoima2, KeraaElamaPisteVoima2);
+        ElamaPisteVoima2.IgnoresCollisionResponse = true;
+        Add(ElamaPisteVoima2);
+    }
+
+    void KeraaElamaPisteVoima1(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        ElamaPisteVoima1.Destroy();
+        ELaskuri.Value += 5;
+    }
+
+    void KeraaElamaPisteVoima2(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        ElamaPisteVoima2.Destroy();
+        ELaskuri.Value += 5;
+    }
+
+    void LuoAmmusLaskuri()
+    {
+        AmmusLaskuri = new IntMeter(500);
+
+        AmmusNaytto = new Label();
+        AmmusNaytto.X = Screen.Left + 1800;
+        AmmusNaytto.Y = Screen.Top - 200;
+        AmmusNaytto.TextColor = Color.Red;
+
+        AmmusNaytto.BindTo(AmmusLaskuri);
+        AmmusNaytto.Title = "Bullets";
+        Add(AmmusNaytto);
+    }
+
+    void LuoAmmusVoimat()
+    {
+        AmmusPisteVoima1 = new PhysicsObject(4, 4);
+        AmmusPisteVoimaKuva = LoadImage("+AmmusPisteVoima");
+        AmmusPisteVoima1.Image = AmmusPisteVoimaKuva;
+        AmmusPisteVoima1.X = 450;
+        AmmusPisteVoima1.Y = -300;
+        AddCollisionHandler(Alus, AmmusPisteVoima1, KeraaAmmusPisteVoima1);
+        AmmusPisteVoima1.IgnoresCollisionResponse = true;
+        Add(AmmusPisteVoima1);
+
+        AmmusPisteVoima2 = new PhysicsObject(4, 4);
+        AmmusPisteVoima2.Image = AmmusPisteVoimaKuva;
+        AmmusPisteVoima2.X = -100;
+        AmmusPisteVoima2.Y = 350;
+        AddCollisionHandler(Alus, AmmusPisteVoima2, KeraaAmmusPisteVoima2);
+        AmmusPisteVoima2.IgnoresCollisionResponse = true;
+        Add(AmmusPisteVoima2);
+    }
+
+    void KeraaAmmusPisteVoima1(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        AmmusPisteVoima1.Destroy();
+        AmmusLaskuri.Value += 250;
+    }
+
+    void KeraaAmmusPisteVoima2(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        AmmusPisteVoima2.Destroy();
+        AmmusLaskuri.Value += 250;
+    }
+
+    void AloitaAlusta()
+    {
+        ClearAll();
+        Begin();
     }
 }
