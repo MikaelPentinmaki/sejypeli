@@ -33,6 +33,15 @@ public class Space_Gun_Man : PhysicsGame
     PhysicsObject AmmusPisteVoima2;
     Image AmmusPisteVoimaKuva;
     Label UudelleenSyntymaTeksti;
+    Timer IsoAmmusLaskuri;
+    PhysicsObject IsoAmmus;
+    Image AmmusKuva = LoadImage("Ammus Kuva");
+    Vector Suunta;
+    bool SaakoAmpua = false;
+    PhysicsObject Asteroidi1;
+    PhysicsObject Asteroidi2;
+    PhysicsObject Asteroidi3;
+    Image AsteroidiKuva;
     
     public override void Begin()
     {
@@ -47,23 +56,26 @@ public class Space_Gun_Man : PhysicsGame
        LuoElamaPisteVoimat();
        LuoAmmusLaskuri();
        LuoAmmusVoimat();
+       LuoIsoAmpumisLaskuri();
+       LuoAsteroidit();
 
         PhoneBackButton.Listen(ConfirmExit, "Lopeta peli");
-        Keyboard.Listen(Key.Escape, ButtonState.Pressed, ConfirmExit, "Lopeta peli");
+        Keyboard.Listen(Key.Escape, ButtonState.Pressed, Exit, "Lopeta peli");
     }
 
     void LuoAlus()
-{
-    Alus = new PhysicsObject(5, 5);
-    Image AlusKuva = LoadImage("Alus");
-    Alus.Image = AlusKuva;
+    {
+        Alus = new PhysicsObject(5, 5);
+        Image AlusKuva = LoadImage("Alus");
+        Alus.Image = AlusKuva;
     
-    Add(Alus);
+        Add(Alus);
     
-    Camera.Zoom(7.0);
-    Camera.FollowedObject = Alus;
-    AddCollisionHandler(Alus, Tormaus);
-}
+        Camera.Zoom(7.0);
+        Camera.FollowedObject = Alus;
+        AddCollisionHandler(Alus, Tormaus);
+        Alus.CanRotate = false;
+    }
 
     void LuoKentta()
     {
@@ -72,6 +84,15 @@ public class Space_Gun_Man : PhysicsGame
         OikeaReuna = Level.CreateRightBorder();
         YlaReuna = Level.CreateTopBorder();
         AlaReuna = Level.CreateBottomBorder();
+
+        /*VasenReuna.IsVisible = false;
+        OikeaReuna.IsVisible = false;
+        YlaReuna.IsVisible = false;
+        AlaReuna.IsVisible = false;*/
+        VasenReuna.Color = Color.FromHexCode("050505");
+        OikeaReuna.Color = Color.FromHexCode("050505");
+        YlaReuna.Color = Color.FromHexCode("050505");
+        AlaReuna.Color = Color.FromHexCode("050505");
     }
 
     void TuhoaAlus()
@@ -96,6 +117,7 @@ public class Space_Gun_Man : PhysicsGame
         Keyboard.Listen(Key.Right, ButtonState.Down, KaannaAlustaOikeaan, "Käännä alusta oikean");
         Keyboard.Listen(Key.Space, ButtonState.Pressed, Ammu, "Ammu");
         Keyboard.Listen(Key.Down, ButtonState.Pressed, PysaytaAlus, "Pysäytä alus");
+        Keyboard.Listen(Key.LeftAlt, ButtonState.Pressed, AmmuIsoAmmus, "Ammu iso ammus");
         IsMouseVisible = true;
     }
 
@@ -145,10 +167,9 @@ public class Space_Gun_Man : PhysicsGame
         {
             Ammus = new PhysicsObject(0.4, 0.4);
             Ammus2 = new PhysicsObject(0.4, 0.4);
-            Image AmmusKuva = LoadImage("Ammus Kuva");
             Ammus.Image = AmmusKuva;
             Ammus2.Image = AmmusKuva;
-            Vector Suunta = Vector.FromLengthAndAngle(150.0, Alus.Angle);
+            Suunta = Vector.FromLengthAndAngle(150.0, Alus.Angle);
             Angle Kulma = Alus.Angle;
             Kulma.Degrees -= 180;
             Vector Suunta2 = Vector.FromLengthAndAngle(150.0, Kulma);
@@ -380,5 +401,100 @@ public class Space_Gun_Man : PhysicsGame
     {
         ClearAll();
         Begin();
+    }
+
+    void LuoIsoAmpumisLaskuri()
+    {
+        IsoAmmusLaskuri = new Timer();
+        IsoAmmusLaskuri.Interval = 5;
+        IsoAmmusLaskuri.Timeout += AmmuIsoAmmusNappaimet;
+        IsoAmmusLaskuri.Start(0);
+    }
+
+    void AmmuIsoAmmusNappaimet()
+    {
+        SaakoAmpua = true;
+        IsoAmmusLaskuri.Start(0);
+        AmmusLaskuri.Value -= 10;
+    }
+
+    void AmmuIsoAmmus()
+    {
+        if (SaakoAmpua == true)
+        {
+            IsoAmmus = new PhysicsObject(4, 4);
+            IsoAmmus.Image = AmmusKuva;
+            Suunta = Vector.FromLengthAndAngle(150.0, Alus.Angle);
+            IsoAmmus.Position = Alus.Position;
+            IsoAmmus.IgnoresCollisionResponse = true;
+            IsoAmmus.Hit(Suunta);
+            Add(IsoAmmus);
+            AddCollisionHandler(IsoAmmus, Vihollinen, OsuIsostiViholliseen);
+            AddCollisionHandler(IsoAmmus, VasenReuna, TuhoaIsoAmmus);
+            AddCollisionHandler(IsoAmmus, OikeaReuna, TuhoaIsoAmmus);
+            AddCollisionHandler(IsoAmmus, YlaReuna, TuhoaIsoAmmus);
+            AddCollisionHandler(IsoAmmus, AlaReuna, TuhoaIsoAmmus);
+            SaakoAmpua = false;
+            AddCollisionHandler(IsoAmmus, "Asteroidi", TuhoaAsteroidi);
+        }
+    }
+
+    void OsuIsostiViholliseen(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        IsoAmmus.Destroy();
+        TuhoaVihollinen();
+    }
+
+    void TuhoaIsoAmmus(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        tormaaja.Destroy();
+    }
+
+    void LuoAsteroidit()
+    {
+        AsteroidiKuva = LoadImage("Asteroidi");
+
+        Asteroidi1 = new PhysicsObject(15, 15);
+        Asteroidi1.X = -30;
+        Asteroidi1.Y = -200;
+        Asteroidi1.Tag = "Asteroidi";
+        AddCollisionHandler(Alus, Asteroidi1, MenetaElamaa);
+        Asteroidi1.Mass = 25;
+        Asteroidi1.Image = AsteroidiKuva;
+        //AddCollisionHandler(IsoAmmus, Asteroidi1, TuhoaAsteroidi);
+        Add(Asteroidi1);
+
+        Asteroidi2 = new PhysicsObject(15, 15);
+        Asteroidi2.X = -100;
+        Asteroidi2.Y = 300;
+        AddCollisionHandler(Alus, Asteroidi2, MenetaElamaa);
+        Asteroidi2.Mass = 25;
+        Asteroidi2.Image = AsteroidiKuva;
+        Asteroidi2.Tag = "Asteroidi";
+        Add(Asteroidi2);
+
+        Asteroidi3 = new PhysicsObject(15, 15);
+        Asteroidi3.X = 300;
+        Asteroidi3.Y = 10;
+        AddCollisionHandler(Alus, Asteroidi3, MenetaElamaa);
+        Asteroidi3.Mass = 25;
+        Asteroidi3.Image = AsteroidiKuva;
+        Asteroidi3.Tag = "Asteroidi";
+        Add(Asteroidi3);
+    }
+
+    void MenetaElamaa(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        ELaskuri.Value -= 5;
+        if (ELaskuri.Value == 0)
+        {
+            TuhoaAlus();
+        }
+    }
+
+    void TuhoaAsteroidi(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        kohde.Destroy();
+        tormaaja.Destroy();
     }
 }
