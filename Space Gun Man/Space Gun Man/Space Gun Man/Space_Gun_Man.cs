@@ -42,22 +42,23 @@ public class Space_Gun_Man : PhysicsGame
     PhysicsObject Asteroidi2;
     PhysicsObject Asteroidi3;
     Image AsteroidiKuva;
+    Image AlusKuva;
     
     public override void Begin()
     {
-       LuoKentta();
-       LuoAlus();
-       AsetaNappaimet();
-       LuoTausta();
-       LuoVihollinen();
-       VALaskuri();
-       ElamaLaskuri();
-       PisteLaskuri();
-       LuoElamaPisteVoimat();
-       LuoAmmusLaskuri();
-       LuoAmmusVoimat();
-       LuoIsoAmpumisLaskuri();
-       LuoAsteroidit();
+        LuoKentta();
+        LuoAlus();
+        AsetaNappaimet();
+        LuoTausta();
+        LuoVihollinen();
+        VALaskuri();
+        ElamaLaskuri();
+        PisteLaskuri();
+        LuoElamaPisteVoimat();
+        LuoAmmusLaskuri();
+        LuoAmmusVoimat();
+        LuoIsoAmpumisLaskuri();
+        LuoAsteroidit();
 
         PhoneBackButton.Listen(ConfirmExit, "Lopeta peli");
         Keyboard.Listen(Key.Escape, ButtonState.Pressed, Exit, "Lopeta peli");
@@ -66,7 +67,7 @@ public class Space_Gun_Man : PhysicsGame
     void LuoAlus()
     {
         Alus = new PhysicsObject(5, 5);
-        Image AlusKuva = LoadImage("Alus");
+        AlusKuva = LoadImage("Alus");
         Alus.Image = AlusKuva;
     
         Add(Alus);
@@ -75,6 +76,7 @@ public class Space_Gun_Man : PhysicsGame
         Camera.FollowedObject = Alus;
         AddCollisionHandler(Alus, Tormaus);
         Alus.CanRotate = false;
+        
     }
 
     void LuoKentta()
@@ -184,6 +186,15 @@ public class Space_Gun_Man : PhysicsGame
             AddCollisionHandler(Ammus, Vihollinen, OsuViholliseen);
             AddCollisionHandler(Ammus2, Vihollinen, OsuViholliseen);
             AmmusLaskuri.Value -= 2;
+            AddCollisionHandler(Ammus, VasenReuna, TuhoaAmmus);
+            AddCollisionHandler(Ammus, OikeaReuna, TuhoaAmmus);
+            AddCollisionHandler(Ammus, YlaReuna, TuhoaAmmus);
+            AddCollisionHandler(Ammus, AlaReuna, TuhoaAmmus);
+
+            AddCollisionHandler(Ammus2, VasenReuna, TuhoaAmmus2);
+            AddCollisionHandler(Ammus2, OikeaReuna, TuhoaAmmus2);
+            AddCollisionHandler(Ammus2, YlaReuna, TuhoaAmmus2);
+            AddCollisionHandler(Ammus2, AlaReuna, TuhoaAmmus2);
         }
     }
     
@@ -497,4 +508,15 @@ public class Space_Gun_Man : PhysicsGame
         kohde.Destroy();
         tormaaja.Destroy();
     }
+
+    void TuhoaAmmus(PhysicsObject tormaaja, PhysicsObject kohde)
+    {
+        tormaaja.Destroy();
+    }
+
+    void TuhoaAmmus2(PhysicsObject tomaaja, PhysicsObject kohde)
+    {
+        tomaaja.Destroy();
+    }
+
 }
